@@ -9,4 +9,4 @@ stdin.on('data', (data) => {
     console.log('Файл создан');
     exit();
   });
-})
+});
