@@ -3,28 +3,6 @@ const fs = require('fs');
 
 const folderName = 'project-dist';
 
-const check = (files, pCopy) => {
-  fs.readdir(pCopy, { withFileTypes: true }, (err, copyfiles) =>{
-    if (err) {
-      console.error(err.message);
-    } else {
-      files = files.map(file => file.name);
-      copyfiles.forEach(file => {
-        if (file.isDirectory() && files.indexOf(file.name) < 0 ) {
-          fs.rmdir(path.join(pCopy, file.name), err =>{
-            if (err) console.error(err.message);
-          });
-        }
-        if(file.isFile() && files.indexOf(file.name) < 0 ){      
-          fs.unlink(path.join(pCopy, file.name), err => {
-            if (err) console.error(err);
-          });
-        }
-      });
-    }
-  });
-};
-
 const createCopy = (p, pCopy) => {
   fs.readdir(p, { withFileTypes: true }, (err, files) => {
     if(err) {
@@ -44,7 +22,6 @@ const createCopy = (p, pCopy) => {
           });
         }
       });
-      check(files, pCopy);
     }
   });
 };
@@ -108,38 +85,43 @@ const searchCssFile = (p) => {
   });
 };
 
-
-fs.mkdir(path.join(__dirname, folderName), {recursive: true}, err => {
-  if (err) { 
-    console.error(1, err);
+fs.rm(path.join(__dirname, folderName), {force:true, recursive: true}, err =>{
+  if (err) {
+    console.error(err.message);
   } else {
-    fs.mkdir(path.join(__dirname, folderName, 'assets'),{recursive: true}, err =>{
-      if(err) {
-        console.error(err.message);
-      }
-      else {
-        createCopy(path.join(__dirname, 'assets'), path.join(__dirname, folderName, 'assets'));
-      }
-    });
-    fs.readFile(path.join(__dirname, 'template.html'), (err, data) =>{
-      if(err) {
-        console.error(2, err.message);
+    fs.mkdir(path.join(__dirname, folderName), {recursive: true}, err => {
+      if (err) { 
+        console.error(1, err);
       } else {
-        let firstData = data.toString();
-        fs.writeFile(path.join(__dirname, folderName, 'index.html'), data, err => {
-          if (err) {
-            console.error(3, err.message);
-          } else {
-            readComponents(path.join(__dirname, 'components'), firstData);
+        fs.mkdir(path.join(__dirname, folderName, 'assets'),{recursive: true}, err =>{
+          if(err) {
+            console.error(err.message);
+          }
+          else {
+            createCopy(path.join(__dirname, 'assets'), path.join(__dirname, folderName, 'assets'));
           }
         });
-      }
-    });  
-    fs.writeFile(path.join(__dirname, 'project-dist', 'style.css'), '', err => {
-      if (err) { 
-        console.error(err.message);
-      } else {
-        searchCssFile(path.join(__dirname, 'styles'));
+        fs.readFile(path.join(__dirname, 'template.html'), (err, data) =>{
+          if(err) {
+            console.error(2, err.message);
+          } else {
+            let firstData = data.toString();
+            fs.writeFile(path.join(__dirname, folderName, 'index.html'), data, err => {
+              if (err) {
+                console.error(3, err.message);
+              } else {
+                readComponents(path.join(__dirname, 'components'), firstData);
+              }
+            });
+          }
+        });  
+        fs.writeFile(path.join(__dirname, 'project-dist', 'style.css'), '', err => {
+          if (err) { 
+            console.error(err.message);
+          } else {
+            searchCssFile(path.join(__dirname, 'styles'));
+          }
+        });
       }
     });
   }
