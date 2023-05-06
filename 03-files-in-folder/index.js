@@ -13,19 +13,12 @@ const writeInformation = (p) => {
   });
 };
 
-const func = (p) => fs.readdir(p, { withFileTypes: true }, (err, files) => {
+fs.readdir(path.join(__dirname, 'secret-folder'), { withFileTypes: true }, (err, files) => {
   if (err)
     console.error(err.message);
   else {
     files.forEach((file) => {
-      if(file.isFile()) {
-        if (!(/^\./).test(file.name)) writeInformation(path.join(p, file.name));
-      } else {
-        func(path.join(p, file.name));
-      }
+      if(file.isFile()) writeInformation(path.join(path.join(__dirname, 'secret-folder'), file.name));
     });
   }
 });
-
-const p = path.join(__dirname, 'secret-folder');
-func(p);
