@@ -10,6 +10,11 @@ const check = (files, pCopy) => {
     } else {
       files = files.map(file => file.name);
       copyfiles.forEach(file => {
+        if (file.isDirectory() && files.indexOf(file.name) < 0 ) {
+          fs.rmdir(path.join(pCopy, file.name), err =>{
+            if (err) console.error(err.message);
+          });
+        }
         if(file.isFile() && files.indexOf(file.name) < 0 ){      
           fs.unlink(path.join(pCopy, file.name), err => {
             if (err) console.error(err);
