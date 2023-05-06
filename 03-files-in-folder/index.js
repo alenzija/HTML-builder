@@ -8,7 +8,7 @@ const writeInformation = (p) => {
       console.error(err.message);
     } else {
       const {size} = stats;
-      console.log(`${name} - ${ext.replace(/^\./, '')} - ${+size / 1000}kb`);
+      console.log(`${name} - ${ext.replace(/^\./, '')} - ${(+size / 1024).toFixed(3)}kb`);
     }
   });
 };
