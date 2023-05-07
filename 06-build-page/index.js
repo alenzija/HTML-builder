@@ -74,7 +74,7 @@ const copyData = (p, pCopy) => {
     if(err) {
       console.error(2, err.message);
     } else {
-      fs.appendFile(pCopy, data, err => {
+      fs.appendFile(pCopy, '\n' + data, err => {
         if(err) console.error(err.message);
       });
     }
