@@ -28,33 +28,43 @@ const createCopy = (p, pCopy) => {
 
 const changeTags = (tag, data, newData) => {
   const reg = new RegExp(`{{${tag.trim()}}}`, 'g');
-  const firstData = data.toString().replace(reg, newData);
-  fs.writeFile(path.join(__dirname, folderName, 'index.html'), firstData, err => {
-    if(err) console.error(err.message);
-  }); 
-  return firstData;
+  return data.toString().replace(reg, newData.toString());
+
 };
 
-const readComponents = (p, data) => fs.readdir(p, { withFileTypes: true }, (err, files) => {
+const readComponents = (p, pCopy) => fs.readdir(p, { withFileTypes: true }, (err, files) => {
   if (err)
     console.error(err.message);
   else {
-    let firstData = data;
-    files.forEach((file) => {
-      if(file.isFile()) {
-        if ((/\.html$/).test(file.name)) {
-          fs.readFile(path.join(p, file.name), (err, data) => {
-            if (err){
-              console.error(err.message);
-            } else {
-              firstData = changeTags(file.name.replace(/\.html$/,''), firstData, data.toString());
-            }
-          });
-        }
+    fs.readFile(pCopy, (err, prevdata) => {
+      if (err) {
+        console.error(err.message);
       } else {
-        readComponents(path.join(p, file.name), firstData);
+        let newData = prevdata;
+        let fileNames = files.filter(file => /\.html$/.test(file.name) && file.isFile()).map((file) => file.name);
+        files.forEach((file) => {
+          if(file.isFile()) {
+            if ((/\.html$/).test(file.name)) {
+              fs.readFile(path.join(p, file.name), (err, data) => {
+                if (err){
+                  console.error(err.message);
+                } else {
+                  newData = changeTags(file.name.replace(/\.html/,''), newData, data);
+                  fileNames = fileNames.filter(fileName => file.name !== fileName);
+                  if (fileNames.length === 0) {
+                    fs.writeFile(path.join(__dirname, folderName, 'index.html'), newData, err => {
+                      if(err) console.error(err.message);
+                    });   
+                  }          
+                }
+              });
+            }
+          } else {
+            readComponents(path.join(p, file.name), path.join(__dirname, folderName, 'index.html'));
+          }
+        });
       }
-    });
+    });    
   }
 });
 
@@ -91,7 +101,7 @@ fs.rm(path.join(__dirname, folderName), {force:true, recursive: true}, err =>{
   } else {
     fs.mkdir(path.join(__dirname, folderName), {recursive: true}, err => {
       if (err) { 
-        console.error(1, err);
+        console.error(err);
       } else {
         fs.mkdir(path.join(__dirname, folderName, 'assets'),{recursive: true}, err =>{
           if(err) {
@@ -101,20 +111,13 @@ fs.rm(path.join(__dirname, folderName), {force:true, recursive: true}, err =>{
             createCopy(path.join(__dirname, 'assets'), path.join(__dirname, folderName, 'assets'));
           }
         });
-        fs.readFile(path.join(__dirname, 'template.html'), (err, data) =>{
-          if(err) {
-            console.error(2, err.message);
+        fs.copyFile(path.join(__dirname, 'template.html'), path.join(__dirname, folderName, 'index.html'), err => {
+          if (err) {
+            console.error(err.message);
           } else {
-            let firstData = data.toString();
-            fs.writeFile(path.join(__dirname, folderName, 'index.html'), data, err => {
-              if (err) {
-                console.error(3, err.message);
-              } else {
-                readComponents(path.join(__dirname, 'components'), firstData);
-              }
-            });
+            readComponents(path.join(__dirname, 'components'), path.join(__dirname, folderName, 'index.html'));
           }
-        });  
+        }); 
         fs.writeFile(path.join(__dirname, 'project-dist', 'style.css'), '', err => {
           if (err) { 
             console.error(err.message);

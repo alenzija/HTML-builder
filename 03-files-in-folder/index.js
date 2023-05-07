@@ -18,7 +18,7 @@ fs.readdir(path.join(__dirname, 'secret-folder'), { withFileTypes: true }, (err,
     console.error(err.message);
   else {
     files.forEach((file) => {
-      if(file.isFile()) writeInformation(path.join(path.join(__dirname, 'secret-folder'), file.name));
+      if(file.isFile() && !/^\./.test(file.name)) writeInformation(path.join(path.join(__dirname, 'secret-folder'), file.name));
     });
   }
 });
